@@ -1,0 +1,27 @@
+Yahtzee Client/Server Messages
+
+When a client connects to the server, the server expects the client to first send an IDENTIFY message (which identifies the name of the client player).  The server will not acknowledge a client until this message is recieved.  Once the IDENTIFY message is recieved, the server responds with a HELLO message.  The HELLO message tells the client which player number they have been assigned to (which tells the client GUI which playing column to use) and also the name of the server player.
+
+The game does not start until the server has sent the START message to all the clients.  This allows the server to wait for multiple clients to connect, but after the game has started, no more players may join the game.  When the game is started, the server sends the START message to each client, which informs each client what the names of all the players are.
+
+The server always goes first.  When any player has finished their turn (including the server), the server sends a TURN message to each client, indicating which players turn it is (by indicating the player number).  If the client sees this player number matches their own server assigned player number, then the client knows that it is their turn.  
+
+When a client is done, the client sends the DONE message to the server.  But first, the client sends the CATEGORY message to the server.  This message informs the server all of the (current) clients category assignments.  The server stores the die roll assignments of each connected client.
+
+When any player has finished their turn (including the server), the server first processes the clients CATEGORY message.  Then, the server sends the SCORECARD message to each client (followed by the TURN message as described above).  The SCORECARD is a long message that reports the current score of each player.  The clients use this message to update their GUI.  Note that the SCORECARD message only sends the rolls associated with each category.  The client does the processing of (re)calculating the client scores and bonuses and such.
+
+The server will determine when all the clients (and the server itself) has assigned all the categories and the game is over.  At this point, the server broadcasts to all the clients the WINNER message, which identifies the player who got the highest score.
+
+NOTE:  All Yahtzee messages are prepended with the "YAHTZEE" token.
+NOTE:  This scheme is not at all secure, a cheating client could easily be developed.  The trade off was that quite a bit of processing is off-loaded to the client, and this scheme is just easier to implement.  Some security is provided in that the messages must be sent in a particular sequence.
+
+
+Server: YAHTZEE HELLO <playerNumber> <identityName>
+Server: YAHTZEE TURN <playerNumber>
+Server: YAHTZEE START 1 <playerName1> 2 <playerName2> 3 <playerName3> 4 <playerName4>
+Server: YAHTZEE SCORECARD <playerIndex> CATEGORY <number> <dieValue1> <dieValue2> <dieValue3> <dieValue4> <dieValue5> <score>
+Server: YAHTZEE WINNER <playerNumber>
+
+Client: YAHTZEE IDENTIFY <identityName>
+Client: YAHTZEE DONE <playerNumber>
+Client: YAHTZEE <playerNumber> CATEGORY <number> <dieValue1> <dieValue2> <dieValue3> <dieValue4> <dieValue5>

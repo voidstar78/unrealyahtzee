@@ -1,1 +1,1 @@
-
+copy ..\..\build\classes\unrealyahtzee\*.*
